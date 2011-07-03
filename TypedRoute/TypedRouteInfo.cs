@@ -10,28 +10,44 @@ namespace TypedRoute
     {
         private readonly MethodCallExpression methodCall;
         private RouteValueDictionary defaults;
+        private string name;
         private string[] namespaces;
 
-        public TypedRouteInfo(Expression<Func<TController, ActionResult>> action, string[] namespaces)
+        public TypedRouteInfo(string name, string url, Expression<Func<TController, ActionResult>> controllerAction,
+                              object constraints, string[] namespaces)
         {
-            methodCall = action.Body as MethodCallExpression;
+            methodCall = controllerAction.Body as MethodCallExpression;
             if (methodCall == null)
-                throw new ArgumentOutOfRangeException("action", "Action should be a MethodCallExpression");
+                throw new ArgumentOutOfRangeException("controllerAction", "Action should be a MethodCallExpression");
             Namespaces = namespaces;
+            Name = name;
+            Url = url;
+            Constraints = constraints;
         }
 
-        public virtual RouteValueDictionary Defaults
+        public string Name
+        {
+            get { return name ?? (name = GetName()); }
+            set { name = value; }
+        }
+
+        public string Url { get; set; }
+
+        public RouteValueDictionary Defaults
         {
             get { return defaults ?? (defaults = GetDefaults()); }
+            set { defaults = value; }
         }
 
-        public virtual string[] Namespaces
+        public object Constraints { get; set; }
+
+        public string[] Namespaces
         {
             get { return namespaces ?? (namespaces = GetNamespaces()); }
-            private set { namespaces = value; }
+            set { namespaces = value; }
         }
 
-        protected virtual string ControllerName
+        private string ControllerName
         {
             get
             {
@@ -40,7 +56,19 @@ namespace TypedRoute
             }
         }
 
-        protected virtual RouteValueDictionary GetDefaults()
+        public Route UseIn(Func<string, string, object, object, string[], Route> mapRouteMethod)
+        {
+            Route route = mapRouteMethod(Name, Url, new {}, Constraints, Namespaces);
+            route.Defaults = Defaults;
+            return route;
+        }
+
+        private string GetName()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        private RouteValueDictionary GetDefaults()
         {
             RouteValueDictionary defaults = GetActionParameters();
             defaults["controller"] = ControllerName;
@@ -48,7 +76,7 @@ namespace TypedRoute
             return defaults;
         }
 
-        protected virtual RouteValueDictionary GetActionParameters()
+        private RouteValueDictionary GetActionParameters()
         {
             var defaultParameters = new RouteValueDictionary();
             ParameterInfo[] methodParameters = methodCall.Method.GetParameters();
@@ -61,14 +89,13 @@ namespace TypedRoute
             return defaultParameters;
         }
 
-        protected virtual string GetActionName()
+        private string GetActionName()
         {
             object[] attributes = methodCall.Method.GetCustomAttributes(typeof (ActionNameAttribute), true);
             return attributes.Length == 1 ? ((ActionNameAttribute) attributes[0]).Name : methodCall.Method.Name;
         }
 
-
-        protected virtual string[] GetNamespaces()
+        private string[] GetNamespaces()
         {
             return new[] {typeof (TController).Namespace};
         }

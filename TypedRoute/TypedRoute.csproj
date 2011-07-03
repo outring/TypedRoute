@@ -33,6 +33,7 @@
   <ItemGroup>
     <Compile Include="AreaRegistrationContextExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="README" />
     <Compile Include="RouteCollectionExtensions.cs" />
     <Compile Include="TypedRouteInfo.cs" />
   </ItemGroup>

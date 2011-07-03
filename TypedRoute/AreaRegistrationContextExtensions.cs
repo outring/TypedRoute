@@ -7,37 +7,43 @@ namespace TypedRoute
 {
     public static class AreaRegistrationContextExtensions
     {
-        public static Route MapRoute<TController>(this AreaRegistrationContext context, string name, string url,
-                                                  Expression<Func<TController, ActionResult>> action)
+        public static Route MapRoute<TController>(this AreaRegistrationContext context, string url,
+                                                  Expression<Func<TController, ActionResult>> controllerAction)
             where TController : IController
         {
-            return MapRoute(context, name, url, action, null /* constraints */, null /* namespaces */);
+            return MapRoute(context, null /* name */, url, controllerAction, null /* constraints */, null /* namespaces */);
         }
 
         public static Route MapRoute<TController>(this AreaRegistrationContext context, string name, string url,
-                                                  Expression<Func<TController, ActionResult>> action, object constraints)
+                                                  Expression<Func<TController, ActionResult>> controllerAction)
             where TController : IController
         {
-            return MapRoute(context, name, url, action, constraints, null /* namespaces */);
+            return MapRoute(context, name, url, controllerAction, null /* constraints */, null /* namespaces */);
         }
 
         public static Route MapRoute<TController>(this AreaRegistrationContext context, string name, string url,
-                                                  Expression<Func<TController, ActionResult>> action,
+                                                  Expression<Func<TController, ActionResult>> controllerAction,
+                                                  object constraints)
+            where TController : IController
+        {
+            return MapRoute(context, name, url, controllerAction, constraints, null /* namespaces */);
+        }
+
+        public static Route MapRoute<TController>(this AreaRegistrationContext context, string name, string url,
+                                                  Expression<Func<TController, ActionResult>> controllerAction,
                                                   string[] namespaces)
             where TController : IController
         {
-            return MapRoute(context, name, url, action, null /* constraints */, namespaces);
+            return MapRoute(context, name, url, controllerAction, null /* constraints */, namespaces);
         }
 
         public static Route MapRoute<TController>(this AreaRegistrationContext context, string name, string url,
-                                                  Expression<Func<TController, ActionResult>> action, object constraints,
-                                                  string[] namespaces)
+                                                  Expression<Func<TController, ActionResult>> controllerAction,
+                                                  object constraints, string[] namespaces)
             where TController : IController
         {
-            var typedRouteInfo = new TypedRouteInfo<TController>(action, namespaces);
-            Route route = context.MapRoute(name, url, new {}, constraints, typedRouteInfo.Namespaces);
-            route.Defaults = typedRouteInfo.Defaults;
-            return route;
+            var typedRouteInfo = new TypedRouteInfo<TController>(name, url, controllerAction, constraints, namespaces);
+            return typedRouteInfo.UseIn(context.MapRoute);
         }
     }
 }
