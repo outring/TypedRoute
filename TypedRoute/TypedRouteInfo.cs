@@ -47,15 +47,6 @@ namespace TypedRoute
             set { namespaces = value; }
         }
 
-        private string ControllerName
-        {
-            get
-            {
-                string controllerName = typeof (TController).Name;
-                return controllerName.Remove(controllerName.LastIndexOf("Controller"));
-            }
-        }
-
         public Route UseIn(Func<string, string, object, object, string[], Route> mapRouteMethod)
         {
             Route route = mapRouteMethod(Name, Url, new {}, Constraints, Namespaces);
@@ -71,7 +62,7 @@ namespace TypedRoute
         private RouteValueDictionary GetDefaults()
         {
             RouteValueDictionary defaults = GetActionParameters();
-            defaults["controller"] = ControllerName;
+            defaults["controller"] = GetControllerName();
             defaults["action"] = GetActionName();
             return defaults;
         }
@@ -93,6 +84,12 @@ namespace TypedRoute
         {
             object[] attributes = methodCall.Method.GetCustomAttributes(typeof (ActionNameAttribute), true);
             return attributes.Length == 1 ? ((ActionNameAttribute) attributes[0]).Name : methodCall.Method.Name;
+        }
+
+        private string GetControllerName()
+        {
+            string controllerName = typeof (TController).Name;
+            return controllerName.Remove(controllerName.LastIndexOf("Controller"));
         }
 
         private string[] GetNamespaces()
