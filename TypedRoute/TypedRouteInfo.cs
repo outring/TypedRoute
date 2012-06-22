@@ -21,7 +21,7 @@ namespace TypedRoute
 				throw new ArgumentOutOfRangeException("controllerAction", "Action should be a MethodCallExpression");
 			Namespaces = namespaces;
 			Name = name;
-			Url = string.IsNullOrWhiteSpace(url) ? Guid.NewGuid().ToString() : url;
+			Url = url ?? Guid.NewGuid().ToString();
 			Constraints = constraints;
 		}
 
