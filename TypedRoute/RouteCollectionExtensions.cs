@@ -7,6 +7,13 @@ namespace TypedRoute
 {
     public static class RouteCollectionExtensions
     {
+        public static Route MapRoute<TController>(this RouteCollection routes,
+                                                  Expression<Func<TController, ActionResult>> controllerAction)
+            where TController : IController
+        {
+            return MapRoute(routes, null /* name */, null /* url */, controllerAction, null /* constraints */, null /* namespaces */);
+        }
+
         public static Route MapRoute<TController>(this RouteCollection routes, string url,
                                                   Expression<Func<TController, ActionResult>> controllerAction)
             where TController : IController

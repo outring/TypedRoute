@@ -7,6 +7,13 @@ namespace TypedRoute
 {
     public static class AreaRegistrationContextExtensions
     {
+		public static Route MapRoute<TController>(this AreaRegistrationContext context,
+												  Expression<Func<TController, ActionResult>> controllerAction)
+			where TController : IController
+		{
+			return MapRoute(context, null /* name */, null /* url */, controllerAction, null /* constraints */, null /* namespaces */);
+		}
+
         public static Route MapRoute<TController>(this AreaRegistrationContext context, string url,
                                                   Expression<Func<TController, ActionResult>> controllerAction)
             where TController : IController
